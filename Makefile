@@ -24,10 +24,8 @@ PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
 PKG_CONFIG_DEPENDS:= \
-	CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_json_v2ctl \
 	CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_json_internal \
 	CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_json_none \
-	CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_exclude_v2ctl \
 	CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_exclude_assets \
 	CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_compress_upx \
 	CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_custom_features \
@@ -91,7 +89,7 @@ endef
 
 define Package/v2ray-core/description
 $(call Package/v2ray-core/Default/description)
-  This package contains v2ray, v2ctl, geoip.dat and geosite.dat.
+  This package contains v2ray, geoip.dat and geosite.dat.
 endef
 
 define Package/v2ray-core-mini
@@ -112,11 +110,7 @@ endef
 
 V2RAY_SED_ARGS:=
 
-ifeq ($(CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_json_v2ctl),y)
-V2RAY_SED_ARGS += \
-	s,// \(_ "github.com/v2fly/v2ray-core/v5/main/json"\),\1,; \
-	s,_ "github.com/v2fly/v2ray-core/v5/main/jsonem",// &,;
-else ifeq ($(CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_json_none),y)
+ifeq ($(CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_json_none),y)
 V2RAY_SED_ARGS += \
 	s,_ "github.com/v2fly/v2ray-core/v5/main/jsonem",// &,;
 endif
@@ -310,15 +304,6 @@ ifeq ($(CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_compress_upx),y)
 	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/v2ray || true
 endif
 
-ifneq ($(CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_exclude_v2ctl),y)
-	$(eval GO_PKG_BUILD_PKG:=github.com/v2fly/v2ray-core/v5/infra/control/main)
-	$(call GoPackage/Build/Compile)
-	mv -f $(GO_PKG_BUILD_BIN_DIR)/main $(GO_PKG_BUILD_BIN_DIR)/v2ctl
-
-ifeq ($(CONFIG_PACKAGE_v2ray_$(BUILD_VARIANT)_compress_upx),y)
-	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/v2ctl || true
-endif
-endif
 endef
 
 define Package/v2ray-core/install
@@ -327,7 +312,6 @@ define Package/v2ray-core/install
 	$(INSTALL_DIR) $(1)/usr/bin
 
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/v2ray $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/v2ctl $(1)/usr/bin
 
 	$(INSTALL_DIR) $(1)/usr/share/v2ray
 
@@ -344,10 +328,6 @@ define Package/v2ray-core-mini/install
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/v2ray $(1)/usr/bin
 
 	$(INSTALL_DIR) $(1)/usr/share/v2ray
-
-ifneq ($(CONFIG_PACKAGE_v2ray_mini_exclude_v2ctl),y)
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/v2ctl $(1)/usr/bin
-endif
 
 ifneq ($(CONFIG_PACKAGE_v2ray_mini_exclude_assets),y)
 	$(INSTALL_DATA) \

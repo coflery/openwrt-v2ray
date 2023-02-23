@@ -5,9 +5,6 @@ choice
 	prompt "JSON Config Support"
 	default PACKAGE_v2ray_mini_json_internal
 
-	config PACKAGE_v2ray_mini_json_v2ctl
-		bool "Load JSON from V2Ctl"
-
 	config PACKAGE_v2ray_mini_json_internal
 		bool "Load JSON Internally"
 
@@ -15,11 +12,6 @@ choice
 		bool "None"
 
 endchoice
-
-config PACKAGE_v2ray_mini_exclude_v2ctl
-	bool "Exclude V2Ctl"
-	depends on PACKAGE_v2ray_mini_json_internal || PACKAGE_v2ray_mini_json_none
-	default y
 
 config PACKAGE_v2ray_mini_exclude_assets
 	bool "Exclude geoip.dat & geosite.dat"
